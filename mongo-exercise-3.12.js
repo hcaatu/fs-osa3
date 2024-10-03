@@ -46,5 +46,3 @@ if (!process.argv[3]) {
         mongoose.connection.close()
       })
 }
-
-

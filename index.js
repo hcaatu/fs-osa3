@@ -11,8 +11,21 @@ app.use(cors())
 morgan.token('body', function (req, res) { return JSON.stringify(req.body) })
 morgan(':method :url :status :res[content-length] - :response-time ms :body')
 
+app.get('/info', (request, response, next) => {
+  Person.find({}).then(people => {
+    if (people) {
+      const now = new Date()
+      response.send(
+        `Phonebook has info for ${people.length} people 
+        <br></br>
+        ${now.toString()}`
+      )
+    }
+  })
+  .catch(error => next(error))
+})
 
-app.get('/api/persons', (request, response) => {
+app.get('/api/persons', (request, response, next) => {
   Person.find({}).then(people => {
     if (people) {
       response.json(people)
@@ -20,6 +33,7 @@ app.get('/api/persons', (request, response) => {
       response.status(404).end()
     }
   })
+  .catch(error => next(error))
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
@@ -36,7 +50,6 @@ app.get('/api/persons/:id', (request, response, next) => {
   })
 })
 
- // todo
 app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndDelete(request.params.id).then(person => {
     response.status(204).end()
@@ -48,7 +61,7 @@ const randomInt = () => {
   return Math.floor(Math.random() * 10000)
 }
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
   console.log(body)
   
@@ -59,16 +72,26 @@ app.post('/api/persons', (request, response) => {
   }
 
   // check if name exists already
+  Person.find({}).then(people => {
 
-  const person = new Person({
-    name: body.name,
-    number: body.number,
-    visible: true
-  })
+    const person = new Person({
+      name: body.name,
+      number: body.number,
+      visible: true
+    })
 
-  person.save().then(savedPerson => {
-    response.json(savedPerson)
+    if (people.map(person => person.name).includes(person.name)) {
+      return response.status(400).json({
+        error: 'name already exists'
+      })
+    }
+  
+    person.save().then(savedPerson => {
+      response.json(savedPerson)
+    })
+
   })
+  .catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (req, res, next) => {

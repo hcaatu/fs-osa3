@@ -14,6 +14,8 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === 'CastError') {
     return response.status(400).send({error: 'id in wrong format'})
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).send({error: error.message})
   }
 
   next(error)
@@ -89,7 +91,7 @@ app.post('/api/persons', (request, response, next) => {
 
   // check if name exists already
   Person.find({}).then(people => {
-    
+
     const person = new Person({
       name: body.name,
       number: body.number,

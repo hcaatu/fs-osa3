@@ -7,15 +7,15 @@ const Person = require('./models/person')
 app.use(express.static('dist'))
 
 const morgan = require('morgan')
-morgan.token('body', function (req, res) { return JSON.stringify(req.body) })
+morgan.token('body', function (req) { return JSON.stringify(req.body) })
 
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
 
   if (error.name === 'CastError') {
-    return response.status(400).send({error: 'id in wrong format'})
+    return response.status(400).send({ error: 'id in wrong format' })
   } else if (error.name === 'ValidationError') {
-    return response.status(400).send({error: error.message})
+    return response.status(400).send({ error: error.message })
   }
 
   next(error)
@@ -28,7 +28,7 @@ app.use(express.json())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({error: 'unknown endpoint'})
+  response.status(404).send({ error: 'unknown endpoint' })
 }
 
 app.get('/info', (request, response, next) => {
@@ -70,7 +70,7 @@ app.get('/api/persons/:id', (request, response, next) => {
 
 app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
-    .then(person => {
+    .then(() => {
       response.status(204).end()
     })
     .catch(error => next(error))
@@ -78,7 +78,7 @@ app.delete('/api/persons/:id', (request, response, next) => {
 
 app.post('/api/persons', (request, response, next) => {
   const body = request.body
-  
+
   if (!body.name || !body.number) {
     return response.status(400).json({
       error: 'missing name or number'
@@ -93,13 +93,13 @@ app.post('/api/persons', (request, response, next) => {
       number: body.number,
       visible: true
     })
-    
+
     if (people.map(person => person.name).includes(person.name)) {
       return response.status(400).json({
         error: 'name already exists'
       })
     }
-  
+
     person.save().then(savedPerson => {
       response.json(savedPerson)
     })

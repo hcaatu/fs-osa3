@@ -17,6 +17,15 @@ export default [
       '@stylistic/js': stylisticJs
     },
     rules: {
+      'eqeqeq': 'error',
+      'no-trailing-spaces': 'error',
+      'object-curly-spacing': [
+        'error', 'always'
+      ],
+      'arrow-spacing': [
+        'error', { 'before': true, 'after': true },
+      ],
+      'no-console': 'off',
       '@stylistic/js/indent': [
         'error',
         2
@@ -34,11 +43,6 @@ export default [
         'never'
       ],
     },
-  },
-  {
-    languageOptions: { 
-      globals: globals.browser 
-    }
   },
   {
     ignores: ["dist/**"],
